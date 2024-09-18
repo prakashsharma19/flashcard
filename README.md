@@ -306,17 +306,29 @@
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const content = e.target.result;
-                    const lines = content.split('\n');
-                    
+                    const lines = content.split('\n').filter(line => line.trim() !== '');
+
+                    if (lines.length === 0) {
+                        alert('The file is empty or does not contain valid flashcard data.');
+                        return;
+                    }
+
                     lines.forEach(line => {
-                        const [question, answer] = line.split(' - ');
+                        const [question, answer] = line.split(' - ').map(part => part.trim());
                         if (question && answer) {
+                            if (!topics[currentSubject]) topics[currentSubject] = {};
+                            if (!topics[currentSubject][currentTopic]) topics[currentSubject][currentTopic] = [];
                             topics[currentSubject][currentTopic].push({ question, answer, flipped: false, correct: null });
                         }
                     });
-                    
+
                     renderFlashcards();
                 };
+
+                reader.onerror = function() {
+                    alert('An error occurred while reading the file.');
+                };
+
                 reader.readAsText(file);
             } else {
                 alert('Please upload a valid .txt file.');
