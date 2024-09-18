@@ -301,7 +301,12 @@
         function extractFlashcards() {
             const fileInput = document.getElementById('file-input');
             const file = fileInput.files[0];
-            
+
+            if (!currentSubject || !currentTopic) {
+                alert('Please select a subject and add or select a topic before extracting flashcards.');
+                return;
+            }
+
             if (file && file.type === 'text/plain') {
                 const reader = new FileReader();
                 reader.onload = function(e) {
@@ -314,11 +319,16 @@
                     }
 
                     lines.forEach(line => {
-                        const [question, answer] = line.split(' - ').map(part => part.trim());
-                        if (question && answer) {
-                            if (!topics[currentSubject]) topics[currentSubject] = {};
-                            if (!topics[currentSubject][currentTopic]) topics[currentSubject][currentTopic] = [];
-                            topics[currentSubject][currentTopic].push({ question, answer, flipped: false, correct: null });
+                        const parts = line.split(' - ').map(part => part.trim());
+                        if (parts.length === 2) {
+                            const [question, answer] = parts;
+                            if (question && answer) {
+                                if (!topics[currentSubject]) topics[currentSubject] = {};
+                                if (!topics[currentSubject][currentTopic]) topics[currentSubject][currentTopic] = [];
+                                topics[currentSubject][currentTopic].push({ question, answer, flipped: false, correct: null });
+                            }
+                        } else {
+                            console.error('Invalid line format:', line);
                         }
                     });
 
