@@ -138,8 +138,6 @@
         <div id="topic-screen" class="screen">
             <h1>Subject: <span id="subject-name"></span></h1>
             <h2>Select or Add Topic</h2>
-            <input type="text" id="topic-input" placeholder="Enter topic name" />
-            <button onclick="addTopic()">Add Topic</button>
             <ul id="topic-list"></ul>
             <input type="file" id="file-input" />
             <button onclick="extractFlashcards()">Extract Flashcards</button>
@@ -173,17 +171,6 @@
                 document.getElementById('subject-screen').style.display = 'none';
                 document.getElementById('topic-screen').style.display = 'block';
                 updateTopics();
-            }
-        }
-
-        function addTopic() {
-            const topic = document.getElementById('topic-input').value;
-            if (topic) {
-                currentTopic = topic;
-                if (!topics[currentSubject]) topics[currentSubject] = {};
-                if (!topics[currentSubject][topic]) topics[currentSubject][topic] = [];
-                updateTopics();
-                showFlashcards();
             }
         }
 
@@ -302,10 +289,22 @@
             const fileInput = document.getElementById('file-input');
             const file = fileInput.files[0];
 
-            if (!currentSubject || !currentTopic) {
-                alert('Please select a subject and add or select a topic before extracting flashcards.');
+            if (!currentSubject) {
+                alert('Please select a subject before extracting flashcards.');
                 return;
             }
+
+            // Prompt for the topic name
+            const topic = prompt('Enter the name of the topic for the flashcards:');
+            if (!topic || topic.trim() === '') {
+                alert('Please enter a valid topic name.');
+                return;
+            }
+            currentTopic = topic.trim();
+
+            // Initialize the topic if it doesn't exist
+            if (!topics[currentSubject]) topics[currentSubject] = {};
+            if (!topics[currentSubject][currentTopic]) topics[currentSubject][currentTopic] = [];
 
             if (file && file.type === 'text/plain') {
                 const reader = new FileReader();
@@ -323,8 +322,6 @@
                         if (parts.length === 2) {
                             const [question, answer] = parts;
                             if (question && answer) {
-                                if (!topics[currentSubject]) topics[currentSubject] = {};
-                                if (!topics[currentSubject][currentTopic]) topics[currentSubject][currentTopic] = [];
                                 topics[currentSubject][currentTopic].push({ question, answer, flipped: false, correct: null });
                             }
                         } else {
