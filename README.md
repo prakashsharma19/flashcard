@@ -1,10 +1,10 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Study Flashcards</title>
+  <title>Interactive Study Flashcards</title>
   <style>
-    /* Basic Reset */
     * {
       margin: 0;
       padding: 0;
@@ -13,207 +13,288 @@
 
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f5f5;
       display: flex;
       justify-content: center;
       align-items: center;
+      flex-direction: column;
       height: 100vh;
-      background: linear-gradient(135deg, #74ebd5 0%, #acb6e5 100%);
-      color: #333;
     }
 
-    h1 {
-      color: #fff;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-      font-size: 2.5rem;
-      margin-bottom: 20px;
+    h1, h2 {
+      color: #333;
       text-align: center;
+      margin-bottom: 20px;
     }
 
     .container {
-      background-color: white;
-      padding: 20px;
-      border-radius: 15px;
-      box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
-      max-width: 400px;
-      width: 100%;
-      text-align: center;
+      width: 90%;
+      max-width: 900px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
     }
 
     .flashcard {
+      width: 100px;
+      height: 100px;
       background-color: #007BFF;
       color: white;
+      margin: 10px;
       border-radius: 10px;
-      padding: 20px;
       text-align: center;
       cursor: pointer;
-      user-select: none;
-      margin-bottom: 20px;
-      transition: transform 0.6s, background-color 0.3s;
-      perspective: 1000px;
-      height: 150px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 18px;
       position: relative;
+      user-select: none;
+      transition: transform 0.6s, background-color 0.3s;
+      transform-style: preserve-3d;
+      perspective: 1000px;
     }
 
     .flashcard.flipped {
-      background-color: #28a745;
       transform: rotateY(180deg);
     }
 
     .flashcard-content {
+      position: absolute;
+      width: 100%;
+      height: 100%;
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 100%;
-      height: 100%;
-      transition: transform 0.6s;
-      transform-style: preserve-3d;
+      backface-visibility: hidden;
     }
 
-    .flashcard .front,
+    .flashcard .front {
+      font-size: 14px;
+      padding: 10px;
+    }
+
     .flashcard .back {
       position: absolute;
-      backface-visibility: hidden;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 20px;
-    }
-
-    .flashcard .back {
       transform: rotateY(180deg);
-    }
-
-    .form {
       display: flex;
       flex-direction: column;
+      gap: 5px;
+      align-items: center;
+    }
+
+    .answer-options {
+      display: flex;
       gap: 10px;
+      margin-top: 10px;
     }
 
-    input, textarea {
-      padding: 12px;
-      font-size: 16px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      width: 100%;
-      background-color: #f9f9f9;
+    .answer-options button {
+      background-color: transparent;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
     }
 
-    button {
-      padding: 12px;
-      font-size: 16px;
+    .answer-options button:hover {
+      transform: scale(1.2);
+    }
+
+    button.correct {
+      color: green;
+    }
+
+    button.incorrect {
+      color: red;
+    }
+
+    .add-topic-btn {
+      margin: 20px 0;
+      padding: 10px 20px;
       background-color: #007BFF;
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 5px;
       cursor: pointer;
-      transition: background-color 0.3s ease;
     }
 
-    button:hover {
+    .add-topic-btn:hover {
       background-color: #0056b3;
     }
 
-    /* Media query for responsiveness */
-    @media (max-width: 500px) {
-      .container {
-        padding: 15px;
-      }
+    .form-container {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+    }
 
-      .flashcard {
-        height: 120px;
-        font-size: 16px;
-      }
+    .input-group {
+      margin-bottom: 10px;
+    }
 
-      input, textarea {
-        font-size: 14px;
-      }
+    .input-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
 
-      button {
-        font-size: 14px;
-        padding: 10px;
-      }
+    .input-group input {
+      padding: 8px;
+      width: 100%;
+      max-width: 300px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .form-container button {
+      padding: 10px 20px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .form-container button:hover {
+      background-color: #0056b3;
+    }
+
+    .delete-flashcard {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background-color: red;
+      color: white;
+      padding: 2px 6px;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
     }
 
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <h1>Study Flashcards</h1>
-    <div id="flashcards"></div>
-
-    <div class="form">
-      <input type="text" id="question" placeholder="Enter the question" required>
-      <textarea id="answer" placeholder="Enter the answer" required></textarea>
-      <button id="addCard">Add Flashcard</button>
+  <div id="subject-container" class="form-container">
+    <h1>Select Subject</h1>
+    <div class="input-group">
+      <label for="subject">Enter Subject</label>
+      <input type="text" id="subject-input" placeholder="e.g. Math">
     </div>
+    <button id="start-subject-btn">Start</button>
   </div>
 
+  <div id="topic-container" class="form-container">
+    <h1>Select Topic</h1>
+    <div class="input-group">
+      <label for="topic">Enter Topic</label>
+      <input type="text" id="topic-input" placeholder="e.g. Algebra">
+    </div>
+    <button id="start-topic-btn">Start</button>
+  </div>
+
+  <h2 id="subject-topic-title"></h2>
+
+  <div id="flashcards-container" class="container"></div>
+
+  <button id="add-topic" class="add-topic-btn">+ Add Topic</button>
+
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const flashcardsContainer = document.getElementById('flashcards');
-      const questionInput = document.getElementById('question');
-      const answerInput = document.getElementById('answer');
-      const addCardButton = document.getElementById('addCard');
+    const subjectContainer = document.getElementById('subject-container');
+    const topicContainer = document.getElementById('topic-container');
+    const flashcardsContainer = document.getElementById('flashcards-container');
+    const addTopicBtn = document.getElementById('add-topic');
+    const subjectInput = document.getElementById('subject-input');
+    const topicInput = document.getElementById('topic-input');
+    const subjectTopicTitle = document.getElementById('subject-topic-title');
+    let subject = '';
+    let topic = '';
 
-      let flashcards = JSON.parse(localStorage.getItem('flashcards')) || [];
+    let flashcards = JSON.parse(localStorage.getItem('flashcards')) || [];
 
-      function createFlashcardElement(flashcard, index) {
-        const flashcardElement = document.createElement('div');
-        flashcardElement.classList.add('flashcard');
-
-        const flashcardContent = document.createElement('div');
-        flashcardContent.classList.add('flashcard-content');
-
-        const front = document.createElement('div');
-        front.classList.add('front');
-        front.textContent = flashcard.question;
-
-        const back = document.createElement('div');
-        back.classList.add('back');
-        back.textContent = flashcard.answer;
-
-        flashcardContent.appendChild(front);
-        flashcardContent.appendChild(back);
-        flashcardElement.appendChild(flashcardContent);
-
-        flashcardElement.addEventListener('click', () => {
-          flashcardElement.classList.toggle('flipped');
-        });
-
-        flashcardsContainer.appendChild(flashcardElement);
+    document.getElementById('start-subject-btn').addEventListener('click', () => {
+      subject = subjectInput.value.trim();
+      if (subject) {
+        subjectContainer.style.display = 'none';
+        topicContainer.style.display = 'flex';
       }
-
-      function renderFlashcards() {
-        flashcardsContainer.innerHTML = '';
-        flashcards.forEach((flashcard, index) => {
-          createFlashcardElement(flashcard, index);
-        });
-      }
-
-      addCardButton.addEventListener('click', () => {
-        const question = questionInput.value.trim();
-        const answer = answerInput.value.trim();
-
-        if (question && answer) {
-          const newFlashcard = { question, answer };
-          flashcards.push(newFlashcard);
-          localStorage.setItem('flashcards', JSON.stringify(flashcards));
-          createFlashcardElement(newFlashcard, flashcards.length - 1);
-          questionInput.value = '';
-          answerInput.value = '';
-        }
-      });
-
-      renderFlashcards();
     });
-  </script>
 
+    document.getElementById('start-topic-btn').addEventListener('click', () => {
+      topic = topicInput.value.trim();
+      if (topic) {
+        topicContainer.style.display = 'none';
+        subjectTopicTitle.textContent = `${subject} - ${topic}`;
+        flashcardsContainer.style.display = 'flex';
+        renderFlashcards();
+      }
+    });
+
+    function createFlashcardElement(flashcard, index) {
+      const flashcardElement = document.createElement('div');
+      flashcardElement.classList.add('flashcard');
+      
+      const flashcardContent = document.createElement('div');
+      flashcardContent.classList.add('flashcard-content');
+      
+      const front = document.createElement('div');
+      front.classList.add('front');
+      front.textContent = flashcard.question;
+      
+      const back = document.createElement('div');
+      back.classList.add('back');
+      back.innerHTML = `
+        <div class="answer-options">
+          <button class="correct">✓</button>
+          <button class="incorrect">✗</button>
+        </div>
+      `;
+      
+      back.querySelector('.correct').addEventListener('click', () => {
+        flashcardElement.style.backgroundColor = 'green';
+      });
+      
+      back.querySelector('.incorrect').addEventListener('click', () => {
+        flashcardElement.style.backgroundColor = 'red';
+      });
+      
+      const deleteBtn = document.createElement('button');
+      deleteBtn.classList.add('delete-flashcard');
+      deleteBtn.textContent = '×';
+      deleteBtn.addEventListener('click', () => {
+        flashcards.splice(index, 1);
+        localStorage.setItem('flashcards', JSON.stringify(flashcards));
+        renderFlashcards();
+      });
+      
+      flashcardContent.appendChild(front);
+      flashcardContent.appendChild(back);
+      flashcardElement.appendChild(flashcardContent);
+      flashcardElement.appendChild(deleteBtn);
+      
+      flashcardElement.addEventListener('click', () => {
+        flashcardElement.classList.toggle('flipped');
+      });
+      
+      flashcardsContainer.appendChild(flashcardElement);
+    }
+
+    function renderFlashcards() {
+      flashcardsContainer.innerHTML = '';
+      flashcards.forEach((flashcard, index) => {
+        createFlashcardElement(flashcard, index);
+      });
+    }
+
+    addTopicBtn.addEventListener('click', () => {
+      const question = prompt('Enter Flashcard Question');
+      if (question) {
+        const newFlashcard = { question, answer: 'Answer not displayed' };
+        flashcards.push(newFlashcard);
+        localStorage.setItem('flashcards', JSON.stringify(flashcards));
+        renderFlashcards();
+      }
+    });
+
+    renderFlashcards();
+
+  </script>
 </body>
 </html>
