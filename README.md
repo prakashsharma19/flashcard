@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -13,12 +12,17 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #f0f0f0;
+            background-color: #f9f9f9;
         }
 
         #app {
-            width: 100%;
+            width: 80%;
+            max-width: 1200px;
             text-align: center;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+            padding: 20px;
         }
 
         .screen {
@@ -27,6 +31,16 @@
 
         h1, h2 {
             color: #333;
+            margin-bottom: 20px;
+        }
+
+        select, input {
+            padding: 10px;
+            font-size: 16px;
+            width: 250px;
+            margin: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
 
         button {
@@ -38,28 +52,23 @@
             font-size: 16px;
             cursor: pointer;
             border-radius: 5px;
+            margin: 10px;
         }
 
         button:hover {
             background-color: #45a049;
         }
 
-        input {
-            padding: 10px;
-            font-size: 16px;
-            width: 200px;
-        }
-
         #flashcards-container {
             display: flex;
             flex-wrap: wrap-reverse;
-            justify-content: right;
+            justify-content: center;
             margin: 20px;
         }
 
         .flashcard {
-            width: 100px;
-            height: 150px;
+            width: 150px;
+            height: 200px;
             margin: 10px;
             background-color: white;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
@@ -68,19 +77,39 @@
             align-items: center;
             text-align: center;
             cursor: pointer;
-            transition: transform 0.3s ease;
+            perspective: 1000px;
+            position: relative;
         }
 
-        .flashcard.flipped {
+        .flashcard-inner {
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            position: absolute;
+        }
+
+        .flashcard.flipped .flashcard-inner {
             transform: rotateY(180deg);
         }
 
-        .flashcard.green {
-            background-color: #a8d5a5;
+        .flashcard-front, .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        .flashcard.red {
-            background-color: #f8d7da;
+        .flashcard-front {
+            background-color: #fff;
+        }
+
+        .flashcard-back {
+            background-color: #f0f0f0;
+            transform: rotateY(180deg);
         }
 
         .flashcard-content {
@@ -88,11 +117,6 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-        }
-
-        .flashcard-content p {
-            margin: 0;
-            padding: 0;
         }
 
         .flashcard-actions {
@@ -107,13 +131,41 @@
             font-size: 14px;
             cursor: pointer;
         }
+
+        .flashcard .delete-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+        }
+
+        .flashcard.green {
+            background-color: #a8d5a5;
+        }
+
+        .flashcard.red {
+            background-color: #f8d7da;
+        }
+
+        .flashcard-icon {
+            width: 24px;
+            height: 24px;
+        }
     </style>
 </head>
 <body>
     <div id="app">
         <div id="subject-screen" class="screen">
             <h1>Select Subject</h1>
-            <input type="text" id="subject-input" placeholder="Enter subject name" />
+            <select id="subject-dropdown">
+                <option value="" disabled selected>Select a subject</option>
+                <option value="Hindi">Hindi</option>
+                <option value="Polity">Polity</option>
+                <option value="History">History</option>
+                <option value="Science">Science</option>
+                <option value="Geography">Geography</option>
+                <option value="UP Special">UP Special</option>
+            </select>
             <button onclick="setSubject()">Submit</button>
         </div>
         
@@ -146,20 +198,23 @@
         };
 
         function setSubject() {
-            const subject = document.getElementById('subject-input').value;
+            const subject = document.getElementById('subject-dropdown').value;
             if (subject) {
                 currentSubject = subject;
                 document.getElementById('subject-name').innerText = subject;
                 document.getElementById('subject-screen').style.display = 'none';
                 document.getElementById('topic-screen').style.display = 'block';
+                updateTopics();
             }
         }
 
         function setTopic() {
             const topic = document.getElementById('topic-input').value;
             if (topic) {
+                if (!topics[topic]) {
+                    topics[topic] = [];
+                }
                 currentTopic = topic;
-                topics[topic] = [];
                 updateTopics();
                 showFlashcards();
             }
@@ -197,10 +252,26 @@
                 flashcard.classList.add('flashcard');
                 flashcard.onclick = () => flipFlashcard(index);
 
-                const content = document.createElement('div');
-                content.classList.add('flashcard-content');
+                const flashcardInner = document.createElement('div');
+                flashcardInner.classList.add('flashcard-inner');
+
+                const flashcardFront = document.createElement('div');
+                flashcardFront.classList.add('flashcard-front');
+
+                const flashcardBack = document.createElement('div');
+                flashcardBack.classList.add('flashcard-back');
+
+                const contentFront = document.createElement('div');
+                contentFront.classList.add('flashcard-content');
                 const question = document.createElement('p');
-                question.innerText = card.flipped ? card.question : card.answer;
+                question.innerText = card.question;
+                contentFront.appendChild(question);
+                flashcardFront.appendChild(contentFront);
+
+                const contentBack = document.createElement('div');
+                contentBack.classList.add('flashcard-content');
+                const answer = document.createElement('p');
+                answer.innerText = card.answer;
 
                 if (card.flipped) {
                     const actions = document.createElement('div');
@@ -216,11 +287,21 @@
 
                     actions.appendChild(correctBtn);
                     actions.appendChild(wrongBtn);
-                    content.appendChild(actions);
+                    contentBack.appendChild(actions);
                 }
 
-                content.appendChild(question);
-                flashcard.appendChild(content);
+                contentBack.appendChild(answer);
+                flashcardBack.appendChild(contentBack);
+
+                flashcardInner.appendChild(flashcardFront);
+                flashcardInner.appendChild(flashcardBack);
+                flashcard.appendChild(flashcardInner);
+
+                const deleteIcon = document.createElement('div');
+                deleteIcon.classList.add('delete-icon');
+                deleteIcon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>';
+                deleteIcon.onclick = (event) => deleteFlashcard(event, index);
+                flashcard.appendChild(deleteIcon);
 
                 if (card.correct === true) flashcard.classList.add('green');
                 if (card.correct === false) flashcard.classList.add('red');
@@ -257,6 +338,12 @@
             }
         }
 
+        function deleteFlashcard(event, index) {
+            event.stopPropagation();
+            topics[currentTopic].splice(index, 1);
+            renderFlashcards();
+        }
+
         function clearSession() {
             localStorage.clear();
             location.reload();
@@ -272,6 +359,13 @@
                 const { topics: savedTopics, currentSubject: savedSubject } = JSON.parse(savedData);
                 topics = savedTopics;
                 currentSubject = savedSubject;
+                document.getElementById('subject-dropdown').value = savedSubject;
+                if (savedSubject) {
+                    document.getElementById('subject-name').innerText = savedSubject;
+                    document.getElementById('subject-screen').style.display = 'none';
+                    document.getElementById('topic-screen').style.display = 'block';
+                    updateTopics();
+                }
             }
         }
     </script>
