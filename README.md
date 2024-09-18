@@ -1,300 +1,279 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Interactive Study Flashcards</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcard App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
 
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f5f5f5;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      height: 100vh;
-    }
+        #app {
+            width: 100%;
+            text-align: center;
+        }
 
-    h1, h2 {
-      color: #333;
-      text-align: center;
-      margin-bottom: 20px;
-    }
+        .screen {
+            display: none;
+        }
 
-    .container {
-      width: 90%;
-      max-width: 900px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
+        h1, h2 {
+            color: #333;
+        }
 
-    .flashcard {
-      width: 100px;
-      height: 100px;
-      background-color: #007BFF;
-      color: white;
-      margin: 10px;
-      border-radius: 10px;
-      text-align: center;
-      cursor: pointer;
-      position: relative;
-      user-select: none;
-      transition: transform 0.6s, background-color 0.3s;
-      transform-style: preserve-3d;
-      perspective: 1000px;
-    }
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
 
-    .flashcard.flipped {
-      transform: rotateY(180deg);
-    }
+        button:hover {
+            background-color: #45a049;
+        }
 
-    .flashcard-content {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      backface-visibility: hidden;
-    }
+        input {
+            padding: 10px;
+            font-size: 16px;
+            width: 200px;
+        }
 
-    .flashcard .front {
-      font-size: 14px;
-      padding: 10px;
-    }
+        #flashcards-container {
+            display: flex;
+            flex-wrap: wrap-reverse;
+            justify-content: right;
+            margin: 20px;
+        }
 
-    .flashcard .back {
-      position: absolute;
-      transform: rotateY(180deg);
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      align-items: center;
-    }
+        .flashcard {
+            width: 100px;
+            height: 150px;
+            margin: 10px;
+            background-color: white;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
 
-    .answer-options {
-      display: flex;
-      gap: 10px;
-      margin-top: 10px;
-    }
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
 
-    .answer-options button {
-      background-color: transparent;
-      border: none;
-      font-size: 24px;
-      cursor: pointer;
-      transition: transform 0.3s ease;
-    }
+        .flashcard.green {
+            background-color: #a8d5a5;
+        }
 
-    .answer-options button:hover {
-      transform: scale(1.2);
-    }
+        .flashcard.red {
+            background-color: #f8d7da;
+        }
 
-    button.correct {
-      color: green;
-    }
+        .flashcard-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
 
-    button.incorrect {
-      color: red;
-    }
+        .flashcard-content p {
+            margin: 0;
+            padding: 0;
+        }
 
-    .add-topic-btn {
-      margin: 20px 0;
-      padding: 10px 20px;
-      background-color: #007BFF;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
+        .flashcard-actions {
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
 
-    .add-topic-btn:hover {
-      background-color: #0056b3;
-    }
-
-    .form-container {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .input-group {
-      margin-bottom: 10px;
-    }
-
-    .input-group label {
-      display: block;
-      margin-bottom: 5px;
-      font-size: 14px;
-    }
-
-    .input-group input {
-      padding: 8px;
-      width: 100%;
-      max-width: 300px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-
-    .form-container button {
-      padding: 10px 20px;
-      background-color: #007BFF;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .form-container button:hover {
-      background-color: #0056b3;
-    }
-
-    .delete-flashcard {
-      position: absolute;
-      top: 5px;
-      right: 5px;
-      background-color: red;
-      color: white;
-      padding: 2px 6px;
-      border: none;
-      border-radius: 50%;
-      cursor: pointer;
-    }
-
-  </style>
+        .flashcard-actions button {
+            padding: 5px;
+            width: 40px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-
-  <div id="subject-container" class="form-container">
-    <h1>Select Subject</h1>
-    <div class="input-group">
-      <label for="subject">Enter Subject</label>
-      <input type="text" id="subject-input" placeholder="e.g. Math">
-    </div>
-    <button id="start-subject-btn">Start</button>
-  </div>
-
-  <div id="topic-container" class="form-container">
-    <h1>Select Topic</h1>
-    <div class="input-group">
-      <label for="topic">Enter Topic</label>
-      <input type="text" id="topic-input" placeholder="e.g. Algebra">
-    </div>
-    <button id="start-topic-btn">Start</button>
-  </div>
-
-  <h2 id="subject-topic-title"></h2>
-
-  <div id="flashcards-container" class="container"></div>
-
-  <button id="add-topic" class="add-topic-btn">+ Add Topic</button>
-
-  <script>
-    const subjectContainer = document.getElementById('subject-container');
-    const topicContainer = document.getElementById('topic-container');
-    const flashcardsContainer = document.getElementById('flashcards-container');
-    const addTopicBtn = document.getElementById('add-topic');
-    const subjectInput = document.getElementById('subject-input');
-    const topicInput = document.getElementById('topic-input');
-    const subjectTopicTitle = document.getElementById('subject-topic-title');
-    let subject = '';
-    let topic = '';
-
-    let flashcards = JSON.parse(localStorage.getItem('flashcards')) || [];
-
-    document.getElementById('start-subject-btn').addEventListener('click', () => {
-      subject = subjectInput.value.trim();
-      if (subject) {
-        subjectContainer.style.display = 'none';
-        topicContainer.style.display = 'flex';
-      }
-    });
-
-    document.getElementById('start-topic-btn').addEventListener('click', () => {
-      topic = topicInput.value.trim();
-      if (topic) {
-        topicContainer.style.display = 'none';
-        subjectTopicTitle.textContent = `${subject} - ${topic}`;
-        flashcardsContainer.style.display = 'flex';
-        renderFlashcards();
-      }
-    });
-
-    function createFlashcardElement(flashcard, index) {
-      const flashcardElement = document.createElement('div');
-      flashcardElement.classList.add('flashcard');
-      
-      const flashcardContent = document.createElement('div');
-      flashcardContent.classList.add('flashcard-content');
-      
-      const front = document.createElement('div');
-      front.classList.add('front');
-      front.textContent = flashcard.question;
-      
-      const back = document.createElement('div');
-      back.classList.add('back');
-      back.innerHTML = `
-        <div class="answer-options">
-          <button class="correct">✓</button>
-          <button class="incorrect">✗</button>
+    <div id="app">
+        <div id="subject-screen" class="screen">
+            <h1>Select Subject</h1>
+            <input type="text" id="subject-input" placeholder="Enter subject name" />
+            <button onclick="setSubject()">Submit</button>
         </div>
-      `;
-      
-      back.querySelector('.correct').addEventListener('click', () => {
-        flashcardElement.style.backgroundColor = 'green';
-      });
-      
-      back.querySelector('.incorrect').addEventListener('click', () => {
-        flashcardElement.style.backgroundColor = 'red';
-      });
-      
-      const deleteBtn = document.createElement('button');
-      deleteBtn.classList.add('delete-flashcard');
-      deleteBtn.textContent = '×';
-      deleteBtn.addEventListener('click', () => {
-        flashcards.splice(index, 1);
-        localStorage.setItem('flashcards', JSON.stringify(flashcards));
-        renderFlashcards();
-      });
-      
-      flashcardContent.appendChild(front);
-      flashcardContent.appendChild(back);
-      flashcardElement.appendChild(flashcardContent);
-      flashcardElement.appendChild(deleteBtn);
-      
-      flashcardElement.addEventListener('click', () => {
-        flashcardElement.classList.toggle('flipped');
-      });
-      
-      flashcardsContainer.appendChild(flashcardElement);
-    }
+        
+        <div id="topic-screen" class="screen">
+            <h1>Subject: <span id="subject-name"></span></h1>
+            <h2>Select or Add Topic</h2>
+            <input type="text" id="topic-input" placeholder="Enter topic name" />
+            <button onclick="setTopic()">Add Topic</button>
+            <ul id="topic-list"></ul>
+        </div>
+        
+        <div id="flashcard-screen" class="screen">
+            <h2 id="flashcard-subject-topic"></h2>
+            <div id="flashcards-container"></div>
+            <button onclick="addFlashcard()">Add Flashcard</button>
+            <button onclick="clearSession()">Clear Session</button>
+        </div>
+    </div>
 
-    function renderFlashcards() {
-      flashcardsContainer.innerHTML = '';
-      flashcards.forEach((flashcard, index) => {
-        createFlashcardElement(flashcard, index);
-      });
-    }
+    <script>
+        let flashcards = [];
+        let currentSubject = '';
+        let currentTopic = '';
+        let topics = {};
 
-    addTopicBtn.addEventListener('click', () => {
-      const question = prompt('Enter Flashcard Question');
-      if (question) {
-        const newFlashcard = { question, answer: 'Answer not displayed' };
-        flashcards.push(newFlashcard);
-        localStorage.setItem('flashcards', JSON.stringify(flashcards));
-        renderFlashcards();
-      }
-    });
+        // Initialize App
+        window.onload = () => {
+            loadSession();
+            document.getElementById('subject-screen').style.display = 'block';
+        };
 
-    renderFlashcards();
+        function setSubject() {
+            const subject = document.getElementById('subject-input').value;
+            if (subject) {
+                currentSubject = subject;
+                document.getElementById('subject-name').innerText = subject;
+                document.getElementById('subject-screen').style.display = 'none';
+                document.getElementById('topic-screen').style.display = 'block';
+            }
+        }
 
-  </script>
+        function setTopic() {
+            const topic = document.getElementById('topic-input').value;
+            if (topic) {
+                currentTopic = topic;
+                topics[topic] = [];
+                updateTopics();
+                showFlashcards();
+            }
+        }
+
+        function updateTopics() {
+            const topicList = document.getElementById('topic-list');
+            topicList.innerHTML = '';
+            for (const topic in topics) {
+                const li = document.createElement('li');
+                li.innerText = topic;
+                li.onclick = () => {
+                    currentTopic = topic;
+                    showFlashcards();
+                };
+                topicList.appendChild(li);
+            }
+        }
+
+        function showFlashcards() {
+            document.getElementById('topic-screen').style.display = 'none';
+            document.getElementById('flashcard-screen').style.display = 'block';
+            document.getElementById('flashcard-subject-topic').innerText = `${currentSubject} - ${currentTopic}`;
+            renderFlashcards();
+        }
+
+        function renderFlashcards() {
+            const container = document.getElementById('flashcards-container');
+            container.innerHTML = '';
+
+            const currentFlashcards = topics[currentTopic] || [];
+
+            currentFlashcards.forEach((card, index) => {
+                const flashcard = document.createElement('div');
+                flashcard.classList.add('flashcard');
+                flashcard.onclick = () => flipFlashcard(index);
+
+                const content = document.createElement('div');
+                content.classList.add('flashcard-content');
+                const question = document.createElement('p');
+                question.innerText = card.flipped ? card.question : card.answer;
+
+                if (card.flipped) {
+                    const actions = document.createElement('div');
+                    actions.classList.add('flashcard-actions');
+
+                    const correctBtn = document.createElement('button');
+                    correctBtn.innerHTML = '&#x2714;';
+                    correctBtn.onclick = (event) => markCorrect(event, index);
+
+                    const wrongBtn = document.createElement('button');
+                    wrongBtn.innerHTML = '&#x2718;';
+                    wrongBtn.onclick = (event) => markWrong(event, index);
+
+                    actions.appendChild(correctBtn);
+                    actions.appendChild(wrongBtn);
+                    content.appendChild(actions);
+                }
+
+                content.appendChild(question);
+                flashcard.appendChild(content);
+
+                if (card.correct === true) flashcard.classList.add('green');
+                if (card.correct === false) flashcard.classList.add('red');
+
+                container.appendChild(flashcard);
+            });
+
+            saveSession();
+        }
+
+        function flipFlashcard(index) {
+            topics[currentTopic][index].flipped = !topics[currentTopic][index].flipped;
+            renderFlashcards();
+        }
+
+        function markCorrect(event, index) {
+            event.stopPropagation();
+            topics[currentTopic][index].correct = true;
+            renderFlashcards();
+        }
+
+        function markWrong(event, index) {
+            event.stopPropagation();
+            topics[currentTopic][index].correct = false;
+            renderFlashcards();
+        }
+
+        function addFlashcard() {
+            const question = prompt('Enter the question:');
+            const answer = prompt('Enter the answer:');
+            if (question && answer) {
+                topics[currentTopic].push({ question, answer, flipped: false, correct: null });
+                renderFlashcards();
+            }
+        }
+
+        function clearSession() {
+            localStorage.clear();
+            location.reload();
+        }
+
+        function saveSession() {
+            localStorage.setItem('flashcardApp', JSON.stringify({ topics, currentSubject }));
+        }
+
+        function loadSession() {
+            const savedData = localStorage.getItem('flashcardApp');
+            if (savedData) {
+                const { topics: savedTopics, currentSubject: savedSubject } = JSON.parse(savedData);
+                topics = savedTopics;
+                currentSubject = savedSubject;
+            }
+        }
+    </script>
 </body>
 </html>
