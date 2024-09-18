@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -43,16 +44,10 @@
             background-color: #45a049;
         }
 
-        input {
+        input, select {
             padding: 10px;
             font-size: 16px;
             width: 200px;
-        }
-
-        select {
-            padding: 10px;
-            font-size: 16px;
-            width: 220px;
         }
 
         #flashcards-container {
@@ -72,7 +67,6 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            cursor: pointer;
             position: relative;
             transition: transform 0.3s ease;
         }
@@ -147,6 +141,8 @@
             <input type="text" id="topic-input" placeholder="Enter topic name" />
             <button onclick="addTopic()">Add Topic</button>
             <ul id="topic-list"></ul>
+            <input type="file" id="file-input" />
+            <button onclick="extractFlashcards()">Extract Flashcards</button>
         </div>
         
         <div id="flashcard-screen" class="screen">
@@ -300,6 +296,31 @@
             event.stopPropagation();
             topics[currentSubject][currentTopic].splice(index, 1);
             renderFlashcards();
+        }
+
+        function extractFlashcards() {
+            const fileInput = document.getElementById('file-input');
+            const file = fileInput.files[0];
+            
+            if (file && file.type === 'text/plain') {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const content = e.target.result;
+                    const lines = content.split('\n');
+                    
+                    lines.forEach(line => {
+                        const [question, answer] = line.split(' - ');
+                        if (question && answer) {
+                            topics[currentSubject][currentTopic].push({ question, answer, flipped: false, correct: null });
+                        }
+                    });
+                    
+                    renderFlashcards();
+                };
+                reader.readAsText(file);
+            } else {
+                alert('Please upload a valid .txt file.');
+            }
         }
 
         function clearSession() {
