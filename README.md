@@ -16,8 +16,8 @@
         #options button { display: block; margin: 10px auto; padding: 15px; width: 300px; font-size: 20px; cursor: pointer; background: #fff; border: 2px solid #ccc; border-radius: 8px; text-align: center; transition: 0.2s; }
         .option:hover, .option:active { background: #ddd; transform: scale(0.95); }
         #result { font-size: 22px; margin-top: 20px; font-weight: bold; display: none; }
-        #nextBtn, #quitBtn { margin-top: 20px; padding: 15px 25px; font-size: 20px; border: none; cursor: pointer; border-radius: 8px; }
-        #nextBtn { background: #28a745; color: white; display: none; }
+        #nextBtn, #quitBtn { margin-top: 20px; padding: 15px 25px; font-size: 20px; border: none; cursor: pointer; border-radius: 8px; display: none; }
+        #nextBtn { background: #28a745; color: white; }
         #quitBtn { background: #dc3545; color: white; }
         #progress-container { position: absolute; top: 10px; right: 10px; display: flex; align-items: center; }
         #progress { font-size: 20px; margin-left: 10px; }
@@ -133,6 +133,20 @@
             document.getElementById("question").textContent = `"${wordObj.word}" का विलोम शब्द क्या है?`;
             document.getElementById("options").innerHTML = options.map(option => `<button class='option' onclick='checkAnswer(this, "${option}", "${correctAnswer}")'>${option}</button>`).join('');
             document.getElementById("result").style.display = "none";
+        }
+
+        function checkAnswer(button, selected, correct) {
+            document.getElementById("result").textContent = selected === correct ? "सही उत्तर!" : "गलत! सही उत्तर: " + correct;
+            document.getElementById("result").style.display = "block";
+            document.getElementById("nextBtn").style.display = "block";
+            testCount++;
+            updateProgress();
+        }
+
+        function confirmQuit() {
+            if (confirm("कृपया अभ्यास ना छोड़ें!")) {
+                location.reload();
+            }
         }
     </script>
 </body>
