@@ -17,7 +17,7 @@
         .option:hover { background: #e0e0e0; }
         #result { font-size: 20px; margin-top: 20px; font-weight: bold; }
         #nextBtn, #quitBtn { margin-top: 20px; padding: 10px 20px; font-size: 18px; border: none; cursor: pointer; border-radius: 5px; }
-        #nextBtn { background: #28a745; color: white; }
+        #nextBtn { background: #28a745; color: white; display: none; }
         #quitBtn { background: #dc3545; color: white; }
         #progress { font-size: 18px; margin-top: 10px; }
         #zoomControls { margin-top: 10px; }
@@ -107,12 +107,17 @@
             loadFlashcard();
         }
 
-        function zoomIn() {
-            document.body.style.fontSize = "larger";
+        function loadQuestion() {
+            let wordObj = words[Math.floor(Math.random() * words.length)];
+            let correctAnswer = wordObj.antonym;
+            let options = words.map(w => w.antonym).sort(() => Math.random() - 0.5);
+            document.getElementById("question").textContent = `"${wordObj.word}" का विलोम शब्द क्या है?`;
+            document.getElementById("options").innerHTML = options.map(option => `<button class='option' onclick='checkAnswer("${option}", "${correctAnswer}")'>${option}</button>`).join('');
         }
 
-        function zoomOut() {
-            document.body.style.fontSize = "smaller";
+        function checkAnswer(selected, correct) {
+            document.getElementById("result").textContent = selected === correct ? "सही उत्तर!" : "गलत! सही उत्तर: " + correct;
+            document.getElementById("nextBtn").style.display = "block";
         }
 
         function confirmQuit() {
