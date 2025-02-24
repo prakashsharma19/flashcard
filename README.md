@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>विलोम शब्द अभ्यास</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f8f8f8; }
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f8f8f8; transition: font-size 0.3s; }
         h1 { color: #333; }
         .button { padding: 10px 20px; margin: 5px; font-size: 18px; cursor: pointer; border: none; border-radius: 5px; }
         .quiz-mode { background: #007bff; color: white; }
         .practice-mode { background: #28a745; color: white; }
-        .flashcard { width: 300px; height: 200px; margin: 20px auto; display: flex; align-items: center; justify-content: center; font-size: 22px; background: blue; color: white; border: 1px solid #ccc; border-radius: 10px; cursor: pointer; transition: transform 0.6s; }
-        .flipped { transform: rotateY(180deg); background: green; }
+        .flashcard { width: 300px; height: 200px; margin: 20px auto; display: flex; align-items: center; justify-content: center; font-size: 22px; background: blue; color: white; border: 1px solid #ccc; border-radius: 10px; cursor: pointer; transition: transform 0.6s, background 0.6s; }
+        .flipped { background: green; }
         .hidden { display: none; }
         #options button { display: block; margin: 10px auto; padding: 10px; font-size: 18px; cursor: pointer; background: #fff; border: 1px solid #ccc; border-radius: 5px; }
         .option:hover { background: #e0e0e0; }
@@ -56,25 +56,11 @@
             { word: "अंगीकार", antonym: "अनंगीकार" },
             { word: "अत्यधिक", antonym: "अत्यल्प" },
             { word: "अंत", antonym: "आदि" },
-            { word: "अथ", antonym: "इति" },
-            { word: "अंतरंग", antonym: "बहिरंग" },
-            { word: "अथाह", antonym: "छिछला" },
-            { word: "अन्तर्द्वन्द्व", antonym: "बहिर्द्वन्द्व" },
-            { word: "अदृश्य", antonym: "दृश्य" },
-            { word: "अंतर्मुखी", antonym: "बहिर्मुखी" },
-            { word: "अद्यतन", antonym: "अनद्यतन" },
-            { word: "अधम", antonym: "उत्तम" },
-            { word: "अंतिम", antonym: "अनंतिम" },
-            { word: "अधिक", antonym: "न्यून" },
-            { word: "अंदर", antonym: "बाहर" },
-            { word: "अधिकतम", antonym: "अल्पतम" },
-            { word: "अंधकार", antonym: "प्रकाश" },
-            { word: "अधिकता", antonym: "अल्पता" },
-            { word: "अंधेरा", antonym: "उजाला" }
+            { word: "अथ", antonym: "इति" }
         ];
-
         let rememberedCount = 0;
-        let wordsCompleted = 0;
+        let currentIndex = 0;
+        let showAntonym = false;
 
         function updateProgress() {
             document.getElementById("progress").textContent = `Your Progress: ${rememberedCount}/${words.length}`;
@@ -86,35 +72,38 @@
             loadFlashcard();
         }
 
+        function startQuiz() {
+            document.getElementById("modeSelection").classList.add("hidden");
+            document.getElementById("quizContainer").classList.remove("hidden");
+            loadQuestion();
+        }
+
         function loadFlashcard() {
-            if (wordsCompleted >= words.length) {
+            if (currentIndex >= words.length) {
                 document.getElementById("flashcard").textContent = "सभी शब्द सीख लिए गए! कृपया याद रखने के लिए निरंतर अभ्यास करें।";
                 return;
             }
-            currentFlashcard = words[wordsCompleted];
-            document.getElementById("flashcard").textContent = currentFlashcard.word;
+            document.getElementById("flashcard").textContent = words[currentIndex].word;
             document.getElementById("flashcard").classList.remove("flipped");
+            showAntonym = false;
         }
 
         function flipCard() {
             let flashcard = document.getElementById("flashcard");
-            if (flashcard.classList.contains("flipped")) {
-                flashcard.textContent = currentFlashcard.word;
-                flashcard.classList.remove("flipped");
-            } else {
-                flashcard.textContent = currentFlashcard.antonym;
-                flashcard.classList.add("flipped");
-            }
+            flashcard.classList.toggle("flipped");
+            flashcard.textContent = showAntonym ? words[currentIndex].word : words[currentIndex].antonym;
+            showAntonym = !showAntonym;
         }
 
         function markKnown() {
             rememberedCount++;
-            wordsCompleted++;
+            currentIndex++;
             updateProgress();
             loadFlashcard();
         }
 
         function markUnknown() {
+            currentIndex++;
             loadFlashcard();
         }
 
