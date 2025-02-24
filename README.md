@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>विलोम शब्द अभ्यास</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f8f8f8; transition: font-size 0.3s; }
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f8f8f8; }
         h1 { color: #333; }
         .button { padding: 10px 20px; margin: 5px; font-size: 18px; cursor: pointer; border: none; border-radius: 5px; }
         .quiz-mode { background: #007bff; color: white; }
@@ -20,16 +20,11 @@
         #nextBtn { background: #28a745; color: white; display: none; }
         #quitBtn { background: #dc3545; color: white; }
         #progress { font-size: 18px; margin-top: 10px; }
-        #zoomControls { margin-top: 10px; }
     </style>
 </head>
 <body>
     <h1>विलोम शब्द अभ्यास</h1>
     <div id="progress">Your Progress: 0/0</div>
-    <div id="zoomControls">
-        <button onclick="zoomIn()">➕</button>
-        <button onclick="zoomOut()">➖</button>
-    </div>
     <div id="modeSelection">
         <button class="button practice-mode" onclick="startPractice()">प्रैक्टिस मोड</button>
         <button class="button quiz-mode" onclick="startQuiz()">टेस्ट मोड</button>
@@ -42,21 +37,13 @@
         <button id="quitBtn" onclick="confirmQuit()">🚪 छोड़ें</button>
     </div>
     
-    <div id="quizContainer" class="hidden">
-        <p id="question">Loading...</p>
-        <div id="options"></div>
-        <p id="result"></p>
-        <button id="nextBtn" onclick="loadQuestion()">अगला प्रश्न</button>
-        <button id="quitBtn" onclick="confirmQuit()">🚪 छोड़ें</button>
-    </div>
-    
     <script>
         const words = [
-            { word: "अंगीकरण", antonym: "अनंगीकरण" },
-            { word: "अंगीकार", antonym: "अनंगीकार" },
-            { word: "अत्यधिक", antonym: "अत्यल्प" },
-            { word: "अंत", antonym: "आदि" },
-            { word: "अथ", antonym: "इति" }
+            { word: "अंगीकरण", antonym: "अनंगीकरण", known: false },
+            { word: "अंगीकार", antonym: "अनंगीकार", known: false },
+            { word: "अत्यधिक", antonym: "अत्यल्प", known: false },
+            { word: "अंत", antonym: "आदि", known: false },
+            { word: "अथ", antonym: "इति", known: false }
         ];
         let rememberedCount = 0;
         let currentIndex = 0;
@@ -64,6 +51,9 @@
 
         function updateProgress() {
             document.getElementById("progress").textContent = `Your Progress: ${rememberedCount}/${words.length}`;
+            if (rememberedCount === words.length) {
+                document.getElementById("flashcard").textContent = "सभी शब्द सीख लिए गए! कृपया याद रखने के लिए निरंतर अभ्यास करते रहें!";
+            }
         }
 
         function startPractice() {
@@ -72,52 +62,36 @@
             loadFlashcard();
         }
 
-        function startQuiz() {
-            document.getElementById("modeSelection").classList.add("hidden");
-            document.getElementById("quizContainer").classList.remove("hidden");
-            loadQuestion();
-        }
-
         function loadFlashcard() {
-            if (currentIndex >= words.length) {
-                document.getElementById("flashcard").textContent = "सभी शब्द सीख लिए गए! कृपया याद रखने के लिए निरंतर अभ्यास करें।";
+            let remainingWords = words.filter(word => !word.known);
+            if (remainingWords.length === 0) {
+                document.getElementById("flashcard").textContent = "सभी शब्द सीख लिए गए! कृपया याद रखने के लिए निरंतर अभ्यास करते रहें!";
                 return;
             }
-            document.getElementById("flashcard").textContent = words[currentIndex].word;
+            currentIndex = Math.floor(Math.random() * remainingWords.length);
+            document.getElementById("flashcard").textContent = remainingWords[currentIndex].word;
             document.getElementById("flashcard").classList.remove("flipped");
             showAntonym = false;
         }
 
         function flipCard() {
             let flashcard = document.getElementById("flashcard");
+            let remainingWords = words.filter(word => !word.known);
             flashcard.classList.toggle("flipped");
-            flashcard.textContent = showAntonym ? words[currentIndex].word : words[currentIndex].antonym;
+            flashcard.textContent = showAntonym ? remainingWords[currentIndex].word : remainingWords[currentIndex].antonym;
             showAntonym = !showAntonym;
         }
 
         function markKnown() {
+            let remainingWords = words.filter(word => !word.known);
+            words.find(w => w.word === remainingWords[currentIndex].word).known = true;
             rememberedCount++;
-            currentIndex++;
             updateProgress();
             loadFlashcard();
         }
 
         function markUnknown() {
-            currentIndex++;
             loadFlashcard();
-        }
-
-        function loadQuestion() {
-            let wordObj = words[Math.floor(Math.random() * words.length)];
-            let correctAnswer = wordObj.antonym;
-            let options = words.map(w => w.antonym).sort(() => Math.random() - 0.5);
-            document.getElementById("question").textContent = `"${wordObj.word}" का विलोम शब्द क्या है?`;
-            document.getElementById("options").innerHTML = options.map(option => `<button class='option' onclick='checkAnswer("${option}", "${correctAnswer}")'>${option}</button>`).join('');
-        }
-
-        function checkAnswer(selected, correct) {
-            document.getElementById("result").textContent = selected === correct ? "सही उत्तर!" : "गलत! सही उत्तर: " + correct;
-            document.getElementById("nextBtn").style.display = "block";
         }
 
         function confirmQuit() {
