@@ -16,9 +16,9 @@
         #options button { display: block; margin: 10px auto; padding: 15px; width: 300px; font-size: 20px; cursor: pointer; background: #fff; border: 2px solid #ccc; border-radius: 8px; text-align: center; transition: 0.2s; }
         .option:hover, .option:active { background: #ddd; transform: scale(0.95); }
         #result { font-size: 22px; margin-top: 20px; font-weight: bold; display: none; }
-        #nextBtn, #quitBtn { margin-top: 20px; padding: 15px 25px; font-size: 20px; border: none; cursor: pointer; border-radius: 8px; display: none; }
+        #nextBtn, #quitBtn, #retryBtn { margin-top: 20px; padding: 15px 25px; font-size: 20px; border: none; cursor: pointer; border-radius: 8px; display: none; }
         #nextBtn { background: #28a745; color: white; }
-        #quitBtn { background: #dc3545; color: white; }
+        #quitBtn, #retryBtn { background: #ff5722; color: white; }
         #progress-container { position: absolute; top: 10px; right: 10px; display: flex; align-items: center; }
         #progress { font-size: 20px; margin-left: 10px; }
         #progress-icon { width: 35px; height: 35px; }
@@ -26,7 +26,7 @@
         .big-button { padding: 15px 25px; font-size: 20px; width: 180px; border-radius: 8px; margin: 10px; }
         .known { background: #28a745; color: white; }
         .unknown { background: #dc3545; color: white; }
-        .quit { background: #ff5722; color: white; }
+        .quit, .retry { background: #ff5722; color: white; }
     </style>
 </head>
 <body>
@@ -45,6 +45,7 @@
         <button class="big-button known" onclick="markKnown()">✅ ज्ञात</button>
         <button class="big-button unknown" onclick="markUnknown()">❌ अज्ञात</button>
         <button class="big-button quit" onclick="confirmQuit()">🚪 छोड़ें</button>
+        <button class="big-button retry" onclick="restartPractice()">🔄 पुनः</button>
     </div>
     
     <div id="quizContainer" class="hidden">
@@ -53,10 +54,11 @@
         <p id="result"></p>
         <button id="nextBtn" onclick="loadQuestion()">अगला प्रश्न</button>
         <button class="big-button quit" onclick="confirmQuit()">🚪 छोड़ें</button>
+        <button class="big-button retry" onclick="restartTest()">🔄 पुनः</button>
     </div>
     
     <script>
-        const words = [
+        let words = [
             { word: "अंगीकरण", antonym: "अनंगीकरण", known: false, tested: false },
             { word: "अंगीकार", antonym: "अनंगीकार", known: false, tested: false },
             { word: "अत्यधिक", antonym: "अत्यल्प", known: false, tested: false },
@@ -71,9 +73,13 @@
             document.getElementById("progress").textContent = `Practice: ${practiceCount}/${words.length} | Test: ${testCount}/${words.length}`;
             if (practiceCount === words.length) {
                 document.getElementById("flashcard").textContent = "सभी शब्द सीख लिए गए! कृपया याद रखने के लिए निरंतर अभ्यास करते रहें!";
+                document.querySelector(".quit").style.display = "inline-block";
+                document.querySelector(".retry").style.display = "inline-block";
             }
             if (testCount === words.length) {
                 document.getElementById("quizContainer").innerHTML = "<h2>सभी शब्द सीख लिए गए! कृपया याद रखने के लिए निरंतर अभ्यास करते रहें!</h2>";
+                document.querySelector(".quit").style.display = "inline-block";
+                document.querySelector(".retry").style.display = "inline-block";
             }
         }
 
@@ -92,7 +98,7 @@
         function loadFlashcard() {
             let remainingWords = words.filter(word => !word.known);
             if (remainingWords.length === 0) {
-                document.getElementById("flashcard").textContent = "सभी शब्द सीख लिए गए! कृपया याद रखने के लिए निरंतर अभ्यास करते रहें!";
+                updateProgress();
                 return;
             }
             let randomIndex = Math.floor(Math.random() * remainingWords.length);
@@ -116,38 +122,17 @@
             loadFlashcard();
         }
 
-        function markUnknown() {
-            loadFlashcard();
-        }
-
         function loadQuestion() {
-            let remainingWords = words.filter(word => !word.tested);
-            if (remainingWords.length === 0) {
-                updateProgress();
-                return;
-            }
-            let wordObj = remainingWords[Math.floor(Math.random() * remainingWords.length)];
-            wordObj.tested = true;
+            let wordObj = words[testCount];
             let correctAnswer = wordObj.antonym;
-            let options = words.map(w => w.antonym).sort(() => Math.random() - 0.5);
             document.getElementById("question").textContent = `"${wordObj.word}" का विलोम शब्द क्या है?`;
-            document.getElementById("options").innerHTML = options.map(option => `<button class='option' onclick='checkAnswer(this, "${option}", "${correctAnswer}")'>${option}</button>`).join('');
+            document.getElementById("options").innerHTML = `<button class='option' onclick='checkAnswer("${correctAnswer}")'>${correctAnswer}</button>`;
             document.getElementById("result").style.display = "none";
         }
 
-        function checkAnswer(button, selected, correct) {
-            document.getElementById("result").textContent = selected === correct ? "सही उत्तर!" : "गलत! सही उत्तर: " + correct;
-            document.getElementById("result").style.display = "block";
-            document.getElementById("nextBtn").style.display = "block";
-            testCount++;
-            updateProgress();
-        }
-
-        function confirmQuit() {
-            if (confirm("कृपया अभ्यास ना छोड़ें!")) {
-                location.reload();
-            }
-        }
+        function restartPractice() { location.reload(); }
+        function restartTest() { location.reload(); }
+        function confirmQuit() { if (confirm("कृपया अभ्यास ना छोड़ें!")) location.reload(); }
     </script>
 </body>
 </html>
