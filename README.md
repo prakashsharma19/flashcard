@@ -16,8 +16,8 @@
         #options button { display: block; margin: 10px auto; padding: 10px; font-size: 18px; cursor: pointer; background: #fff; border: 1px solid #ccc; border-radius: 5px; }
         .option:hover { background: #e0e0e0; }
         #result { font-size: 20px; margin-top: 20px; font-weight: bold; }
-        #nextBtn, #quitBtn { margin-top: 20px; padding: 10px 20px; font-size: 18px; border: none; cursor: pointer; border-radius: 5px; }
-        #nextBtn { background: #28a745; color: white; display: none; }
+        #nextBtn, #quitBtn { margin-top: 20px; padding: 10px 20px; font-size: 18px; border: none; cursor: pointer; border-radius: 5px; display: none; }
+        #nextBtn { background: #28a745; color: white; }
         #quitBtn { background: #dc3545; color: white; }
         #progress { font-size: 18px; margin-top: 10px; }
     </style>
@@ -37,6 +37,14 @@
         <button id="quitBtn" onclick="confirmQuit()">🚪 छोड़ें</button>
     </div>
     
+    <div id="quizContainer" class="hidden">
+        <p id="question">Loading...</p>
+        <div id="options"></div>
+        <p id="result"></p>
+        <button id="nextBtn" onclick="loadQuestion()">अगला प्रश्न</button>
+        <button id="quitBtn" onclick="confirmQuit()">🚪 छोड़ें</button>
+    </div>
+    
     <script>
         const words = [
             { word: "अंगीकरण", antonym: "अनंगीकरण", known: false },
@@ -46,8 +54,6 @@
             { word: "अथ", antonym: "इति", known: false }
         ];
         let rememberedCount = 0;
-        let currentIndex = 0;
-        let showAntonym = false;
 
         function updateProgress() {
             document.getElementById("progress").textContent = `Your Progress: ${rememberedCount}/${words.length}`;
@@ -62,36 +68,24 @@
             loadFlashcard();
         }
 
-        function loadFlashcard() {
-            let remainingWords = words.filter(word => !word.known);
-            if (remainingWords.length === 0) {
-                document.getElementById("flashcard").textContent = "सभी शब्द सीख लिए गए! कृपया याद रखने के लिए निरंतर अभ्यास करते रहें!";
-                return;
-            }
-            currentIndex = Math.floor(Math.random() * remainingWords.length);
-            document.getElementById("flashcard").textContent = remainingWords[currentIndex].word;
-            document.getElementById("flashcard").classList.remove("flipped");
-            showAntonym = false;
+        function startQuiz() {
+            document.getElementById("modeSelection").classList.add("hidden");
+            document.getElementById("quizContainer").classList.remove("hidden");
+            loadQuestion();
         }
 
-        function flipCard() {
-            let flashcard = document.getElementById("flashcard");
-            let remainingWords = words.filter(word => !word.known);
-            flashcard.classList.toggle("flipped");
-            flashcard.textContent = showAntonym ? remainingWords[currentIndex].word : remainingWords[currentIndex].antonym;
-            showAntonym = !showAntonym;
+        function loadQuestion() {
+            let wordObj = words[Math.floor(Math.random() * words.length)];
+            let correctAnswer = wordObj.antonym;
+            let options = words.map(w => w.antonym).sort(() => Math.random() - 0.5);
+            document.getElementById("question").textContent = `"${wordObj.word}" का विलोम शब्द क्या है?`;
+            document.getElementById("options").innerHTML = options.map(option => `<button class='option' onclick='checkAnswer("${option}", "${correctAnswer}")'>${option}</button>`).join('');
+            document.getElementById("nextBtn").style.display = "none";
         }
 
-        function markKnown() {
-            let remainingWords = words.filter(word => !word.known);
-            words.find(w => w.word === remainingWords[currentIndex].word).known = true;
-            rememberedCount++;
-            updateProgress();
-            loadFlashcard();
-        }
-
-        function markUnknown() {
-            loadFlashcard();
+        function checkAnswer(selected, correct) {
+            document.getElementById("result").textContent = selected === correct ? "सही उत्तर!" : "गलत! सही उत्तर: " + correct;
+            document.getElementById("nextBtn").style.display = "block";
         }
 
         function confirmQuit() {
