@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
@@ -71,6 +72,9 @@
             if (practiceCount === words.length) {
                 document.getElementById("flashcard").textContent = "सभी शब्द सीख लिए गए! कृपया याद रखने के लिए निरंतर अभ्यास करते रहें!";
             }
+            if (testCount === words.length) {
+                document.getElementById("quizContainer").innerHTML = "<h2>सभी शब्द सीख लिए गए! कृपया याद रखने के लिए निरंतर अभ्यास करते रहें!</h2>";
+            }
         }
 
         function startPractice() {
@@ -117,27 +121,18 @@
         }
 
         function loadQuestion() {
-            let wordObj = words[Math.floor(Math.random() * words.length)];
+            let remainingWords = words.filter(word => !word.tested);
+            if (remainingWords.length === 0) {
+                updateProgress();
+                return;
+            }
+            let wordObj = remainingWords[Math.floor(Math.random() * remainingWords.length)];
             wordObj.tested = true;
             let correctAnswer = wordObj.antonym;
             let options = words.map(w => w.antonym).sort(() => Math.random() - 0.5);
             document.getElementById("question").textContent = `"${wordObj.word}" का विलोम शब्द क्या है?`;
             document.getElementById("options").innerHTML = options.map(option => `<button class='option' onclick='checkAnswer(this, "${option}", "${correctAnswer}")'>${option}</button>`).join('');
             document.getElementById("result").style.display = "none";
-        }
-
-        function checkAnswer(button, selected, correct) {
-            document.getElementById("result").textContent = selected === correct ? "सही उत्तर!" : "गलत! सही उत्तर: " + correct;
-            document.getElementById("result").style.display = "block";
-            document.getElementById("nextBtn").style.display = "block";
-            testCount++;
-            updateProgress();
-        }
-
-        function confirmQuit() {
-            if (confirm("कृपया अभ्यास ना छोड़ें!")) {
-                location.reload();
-            }
         }
     </script>
 </body>
