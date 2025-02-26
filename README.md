@@ -6,7 +6,7 @@
     <style>
         body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f8f8f8; position: relative; }
         h1 { color: #333; }
-        .button { padding: 15px 25px; margin: 5px; font-size: 20px; cursor: pointer; border: none; border-radius: 8px; }
+        .button { padding: 15px 30px; margin: 5px; font-size: 20px; cursor: pointer; border: none; border-radius: 8px; }
         .quiz-mode { background: #007bff; color: white; }
         .practice-mode { background: #28a745; color: white; }
         .flashcard { width: 300px; height: 200px; margin: 20px auto; display: flex; align-items: center; justify-content: center; font-size: 24px; background: blue; color: white; border: 1px solid #ccc; border-radius: 10px; cursor: pointer; transition: transform 0.6s, background 0.6s; }
